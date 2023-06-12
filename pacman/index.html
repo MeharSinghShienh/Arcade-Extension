@@ -1,19 +1,154 @@
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pacman</title>
+</head>
 <style>
   body {
     margin: 0;
-    background-color: black;
+    background-color: white;
     padding: 10px 20px;
-  }
-</style>
-<p
-  style="
-    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-family: sans-serif;
     font-size: 14px;
-    margin-bottom: 6px;
-  "
->
-  <span>Score: </span><span id="scoreEl">0</span>
-</p>
-<canvas></canvas>
+  }
+</style>
+<!-- audio button -->
+<div id="audioButton" style="position: relative">
+  <img
+    style="
+      cursor: pointer;
+      position: absolute;
+      z-index: 30;
+      height: 30px;
+      top: 40px;
+      right: 8px;
+      margin: 0;
+    "
+    id="audioIcon"
+    src="./img/volumeon.png"
+    alt="Audio Button"
+  />
+
+  <div style="position: relative" id="parentDiv">
+    <p
+      id="scoreContainer"
+      style="
+        color: white;
+        font-family: sans-serif;
+        font-size: 14px;
+        margin-bottom: 6px;
+        display: none;
+      "
+    >
+      <span>Score: </span><span id="scoreEl">0</span>
+    </p>
+    <canvas style="background-color: black"></canvas>
+
+    <!-- start screen background -->
+    <div
+      id="startScreen"
+      style="
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: black;
+        z-index: 20;
+        background-size: contain;
+        background-repeat: no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div style="text-align: center">
+        <h1
+          style="
+            color: yellow;
+            font-family: 'Permanent Marker', cursive;
+            font-size: 80px;
+          "
+        >
+          PACMAN
+        </h1>
+
+        <!-- start button -->
+        <div id="startButton" style="position: relative; display: inline-block">
+          <h2 style="color: white; font-family: calibri">
+            Press Enter to Start
+          </h2>
+        </div>
+      </div>
+    </div>
+
+    <!-- Restart screen background -->
+    <div
+      id="restartScreen"
+      style="
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background-color: black;
+        z-index: 20;
+        background-size: contain;
+        background-repeat: no-repeat;
+        display: none;
+        align-items: center;
+        justify-content: center;
+      "
+    >
+      <div style="text-align: center">
+        <h1
+          id="finalOutcome"
+          style="
+            color: red;
+            font-family: 'Permanent Marker', cursive;
+            font-size: 60px;
+          "
+        >
+          GAME OVER
+        </h1>
+        <h1
+          id="finalScore"
+          style="color: white; margin: 0; font-size: 48px; font-family: calibri"
+        >
+          0
+        </h1>
+        <p style="color: white; margin-top: 0; font-family: calibri">Points</p>
+
+        <!-- start button -->
+        <div
+          id="restartButton"
+          style="position: relative; display: inline-block"
+        >
+          <h2 style="color: white; font-family: calibri">
+            Press Enter to Play Again
+          </h2>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script
+  src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"
+  integrity="sha512-6+YN/9o9BWrk6wSfGxQGpt3EUK6XeHi6yeHV+TYD2GR0Sj/cggRpXr1BrAQf0as6XslxomMUxXp2vIl+fv0QRA=="
+  crossorigin="anonymous"
+  referrerpolicy="no-referrer"
+></script>
+
+<script src="./audio.js"></script>
+<script src="./js/utils.js"></script>
+<script src="./js/classes/Boundary.js"></script>
+<script src="./js/classes/Ghost.js"></script>
+<script src="./js/classes/Pellet.js"></script>
+<script src="./js/classes/Player.js"></script>
+<script src="./js/classes/PowerUp.js"></script>
+<script src="./js/eventListeners.js"></script>
+<script src="./js/setup.js"></script>
 <script src="index.js"></script>

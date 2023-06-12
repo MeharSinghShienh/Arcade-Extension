@@ -3,132 +3,31 @@ const ctx = canvas.getContext("2d");
 
 const scoreEl = document.querySelector("#scoreEl");
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+const map = [
+  ["1", "-", "-", "-", "-", "-", "-", "-", "-", "-", "2"],
+  ["|", " ", ".", ".", ".", ".", ".", ".", ".", ".", "|"],
+  ["|", ".", "b", ".", "[", "7", "]", ".", "b", ".", "|"],
+  ["|", ".", ".", ".", ".", "_", "p", ".", ".", ".", "|"],
+  ["|", ".", "[", "]", ".", ".", ".", "[", "]", ".", "|"],
+  ["|", ".", ".", ".", ".", "^", ".", ".", ".", ".", "|"],
+  ["|", ".", "b", ".", "[", "+", "]", ".", "b", ".", "|"],
+  ["|", ".", ".", ".", ".", "_", ".", ".", ".", ".", "|"],
+  ["|", ".", "[", "]", ".", ".", ".", "[", "]", ".", "|"],
+  ["|", ".", ".", ".", ".", "^", ".", ".", ".", ".", "|"],
+  ["|", ".", "b", ".", "[", "5", "]", ".", "b", ".", "|"],
+  ["|", ".", ".", ".", ".", ".", ".", ".", ".", "p", "|"],
+  ["4", "-", "-", "-", "-", "-", "-", "-", "-", "-", "3"],
+];
 
-class Boundary {
-  static width = 40; // static variable values apply to all objects of the class and not a specific instance
-  static height = 40;
-  constructor({ position, image }) {
-    this.position = position;
-    this.width = 40;
-    this.height = 40;
-    this.image = image;
-  }
+canvas.width = map[0].length * Boundary.width;
+canvas.height = map.length * Boundary.height;
 
-  draw() {
-    // ctx.fillStyle = "blue";
-    // ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
-    ctx.drawImage(this.image, this.position.x, this.position.y);
-  }
-}
-
-class Player {
-  constructor({ position, velocity }) {
-    this.position = position;
-    this.velocity = velocity;
-    this.radius = 15;
-    this.radians = 0.75;
-    this.openRate = 0.12;
-    this.rotation = 0;
-  }
-
-  draw() {
-    ctx.save();
-    ctx.translate(this.position.x, this.position.y);
-    ctx.rotate(this.rotation);
-    ctx.translate(-this.position.x, -this.position.y);
-    ctx.beginPath();
-    ctx.arc(
-      this.position.x,
-      this.position.y,
-      this.radius,
-      this.radians,
-      Math.PI * 2 - this.radians
-    );
-    ctx.lineTo(this.position.x, this.position.y);
-    ctx.fillStyle = "yellow";
-    ctx.fill();
-    ctx.closePath();
-    ctx.restore();
-  }
-
-  update() {
-    this.draw();
-    this.position.x += this.velocity.x;
-    this.position.y += this.velocity.y;
-
-    if (this.radians < 0 || this.radians > 0.75) {
-      this.openRate = -this.openRate;
-    }
-    this.radians += this.openRate;
-  }
-}
-
-class Ghost {
-  static speed = 2;
-  constructor({ position, velocity, color = "red" }) {
-    this.position = position;
-    this.velocity = velocity;
-    this.radius = 15;
-    this.color = color;
-    this.prevCollisions = [];
-    this.speed = 2;
-    this.scared = false;
-  }
-
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = this.scared ? "blue" : this.color;
-    ctx.fill();
-    ctx.closePath();
-  }
-
-  update() {
-    this.draw();
-    this.position.x += this.velocity.x;
-    this.position.y += this.velocity.y;
-  }
-}
-
-class Pellet {
-  constructor({ position }) {
-    this.position = position;
-    this.radius = 3;
-  }
-
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
-    ctx.fill();
-    ctx.closePath();
-  }
-}
-
-class PowerUp {
-  constructor({ position }) {
-    this.position = position;
-    this.radius = 7;
-  }
-
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = "white";
-    ctx.fill();
-    ctx.closePath();
-  }
-}
-
-const pellets = [];
-const boundaries = [];
-const powerUps = [];
-const ghosts = [
+let pellets = [];
+let powerUps = [];
+let ghosts = [
   new Ghost({
     position: {
-      x: Boundary.width * 6 + Boundary.width / 2,
+      x: Boundary.width * 8 + Boundary.width / 2,
       y: Boundary.height + Boundary.height / 2,
     },
     velocity: {
@@ -138,8 +37,8 @@ const ghosts = [
   }),
   new Ghost({
     position: {
-      x: Boundary.width * 6 + Boundary.width / 2,
-      y: Boundary.height * 3 + Boundary.height / 2,
+      x: Boundary.width + Boundary.width / 2,
+      y: Boundary.height * 11 + Boundary.height / 2,
     },
     velocity: {
       x: Ghost.speed,
@@ -147,9 +46,31 @@ const ghosts = [
     },
     color: "pink",
   }),
+  new Ghost({
+    position: {
+      x: Boundary.width * 8 + Boundary.width / 2,
+      y: Boundary.height * 11 + Boundary.height / 2,
+    },
+    velocity: {
+      x: Ghost.speed,
+      y: 0,
+    },
+    color: "aqua",
+  }),
+  new Ghost({
+    position: {
+      x: Boundary.width * 6 + Boundary.width / 2,
+      y: Boundary.height * 7 + Boundary.height / 2,
+    },
+    velocity: {
+      x: Ghost.speed,
+      y: 0,
+    },
+    color: "orange",
+  }),
 ];
 
-const player = new Player({
+let player = new Player({
   position: {
     x: Boundary.width + Boundary.width / 2,
     y: Boundary.height + Boundary.height / 2,
@@ -160,7 +81,7 @@ const player = new Player({
   },
 });
 
-const keys = {
+let keys = {
   w: {
     pressed: false,
   },
@@ -176,339 +97,126 @@ const keys = {
 };
 
 let lastKey = "";
+
+let game = {
+  over: false,
+  active: false,
+};
+
 let score = 0;
 
-const map = [
-  ["1", "-", "-", "-", "-", "-", "-", "-", "-", "-", "2"],
-  ["|", " ", ".", ".", ".", ".", ".", ".", ".", ".", "|"],
-  ["|", ".", "b", ".", "[", "7", "]", ".", "b", ".", "|"],
-  ["|", ".", ".", ".", ".", "_", ".", ".", ".", ".", "|"],
-  ["|", ".", "[", "]", ".", ".", ".", "[", "]", ".", "|"],
-  ["|", ".", ".", ".", ".", "^", ".", ".", ".", ".", "|"],
-  ["|", ".", "b", ".", "[", "+", "]", ".", "b", ".", "|"],
-  ["|", ".", ".", ".", ".", "_", ".", ".", ".", ".", "|"],
-  ["|", ".", "[", "]", ".", ".", ".", "[", "]", ".", "|"],
-  ["|", ".", ".", ".", ".", "^", ".", ".", ".", ".", "|"],
-  ["|", ".", "b", ".", "[", "5", "]", ".", "b", ".", "|"],
-  ["|", ".", ".", ".", ".", ".", ".", ".", ".", "p", "|"],
-  ["4", "-", "-", "-", "-", "-", "-", "-", "-", "-", "3"],
-];
-
-function createImage(src) {
-  const image = new Image();
-  image.src = src;
-  return image;
-}
-
-map.forEach((row, i) => {
-  row.forEach((symbol, j) => {
-    switch (symbol) {
-      case "-":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: Boundary.width * j,
-              y: Boundary.height * i,
-            },
-            image: createImage("./img/pipeHorizontal.png"),
-          })
-        );
-        break;
-      case "|":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: Boundary.width * j,
-              y: Boundary.height * i,
-            },
-            image: createImage("./img/pipeVertical.png"),
-          })
-        );
-        break;
-      case "1":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: Boundary.width * j,
-              y: Boundary.height * i,
-            },
-            image: createImage("./img/pipeCorner1.png"),
-          })
-        );
-        break;
-      case "2":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: Boundary.width * j,
-              y: Boundary.height * i,
-            },
-            image: createImage("./img/pipeCorner2.png"),
-          })
-        );
-        break;
-      case "3":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: Boundary.width * j,
-              y: Boundary.height * i,
-            },
-            image: createImage("./img/pipeCorner3.png"),
-          })
-        );
-        break;
-      case "4":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: Boundary.width * j,
-              y: Boundary.height * i,
-            },
-            image: createImage("./img/pipeCorner4.png"),
-          })
-        );
-        break;
-      case "b":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: Boundary.width * j,
-              y: Boundary.height * i,
-            },
-            image: createImage("./img/block.png"),
-          })
-        );
-        break;
-      case "[":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: j * Boundary.width,
-              y: i * Boundary.height,
-            },
-            image: createImage("./img/capLeft.png"),
-          })
-        );
-        break;
-      case "]":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: j * Boundary.width,
-              y: i * Boundary.height,
-            },
-            image: createImage("./img/capRight.png"),
-          })
-        );
-        break;
-      case "_":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: j * Boundary.width,
-              y: i * Boundary.height,
-            },
-            image: createImage("./img/capBottom.png"),
-          })
-        );
-        break;
-      case "^":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: j * Boundary.width,
-              y: i * Boundary.height,
-            },
-            image: createImage("./img/capTop.png"),
-          })
-        );
-        break;
-      case "+":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: j * Boundary.width,
-              y: i * Boundary.height,
-            },
-            image: createImage("./img/pipeCross.png"),
-          })
-        );
-        break;
-      case "5":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: j * Boundary.width,
-              y: i * Boundary.height,
-            },
-            color: "blue",
-            image: createImage("./img/pipeConnectorTop.png"),
-          })
-        );
-        break;
-      case "6":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: j * Boundary.width,
-              y: i * Boundary.height,
-            },
-            color: "blue",
-            image: createImage("./img/pipeConnectorRight.png"),
-          })
-        );
-        break;
-      case "7":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: j * Boundary.width,
-              y: i * Boundary.height,
-            },
-            color: "blue",
-            image: createImage("./img/pipeConnectorBottom.png"),
-          })
-        );
-        break;
-      case "8":
-        boundaries.push(
-          new Boundary({
-            position: {
-              x: j * Boundary.width,
-              y: i * Boundary.height,
-            },
-            image: createImage("./img/pipeConnectorLeft.png"),
-          })
-        );
-        break;
-      case ".":
-        pellets.push(
-          new Pellet({
-            position: {
-              x: j * Boundary.width + Boundary.width / 2,
-              y: i * Boundary.height + Boundary.height / 2,
-            },
-          })
-        );
-        break;
-      case "p":
-        powerUps.push(
-          new PowerUp({
-            position: {
-              x: j * Boundary.width + Boundary.width / 2,
-              y: i * Boundary.height + Boundary.height / 2,
-            },
-          })
-        );
-        break;
-    }
-  });
-});
-
-function circleCollidesWithRectangle({ circle, rectangle }) {
-  const padding = Boundary.width / 2 - circle.radius - 1;
-  return (
-    circle.position.y - circle.radius + circle.velocity.y <=
-      rectangle.position.y + rectangle.height + padding &&
-    circle.position.x + circle.radius + circle.velocity.x >=
-      rectangle.position.x - padding &&
-    circle.position.y + circle.radius + circle.velocity.y >=
-      rectangle.position.y - padding &&
-    circle.position.x - circle.radius + circle.velocity.x <=
-      rectangle.position.x + rectangle.width + padding
-  );
-}
-
 let animationId;
+
+let boundaries = generateBoundaries();
+
+function init() {
+  pellets = [];
+  powerUps = [];
+  ghosts = [
+    new Ghost({
+      position: {
+        x: Boundary.width * 8 + Boundary.width / 2,
+        y: Boundary.height + Boundary.height / 2,
+      },
+      velocity: {
+        x: Ghost.speed,
+        y: 0,
+      },
+    }),
+    new Ghost({
+      position: {
+        x: Boundary.width + Boundary.width / 2,
+        y: Boundary.height * 11 + Boundary.height / 2,
+      },
+      velocity: {
+        x: Ghost.speed,
+        y: 0,
+      },
+      color: "pink",
+    }),
+    new Ghost({
+      position: {
+        x: Boundary.width * 8 + Boundary.width / 2,
+        y: Boundary.height * 11 + Boundary.height / 2,
+      },
+      velocity: {
+        x: Ghost.speed,
+        y: 0,
+      },
+      color: "aqua",
+    }),
+    new Ghost({
+      position: {
+        x: Boundary.width * 6 + Boundary.width / 2,
+        y: Boundary.height * 7 + Boundary.height / 2,
+      },
+      velocity: {
+        x: Ghost.speed,
+        y: 0,
+      },
+      color: "orange",
+    }),
+  ];
+  player = new Player({
+    position: {
+      x: Boundary.width + Boundary.width / 2,
+      y: Boundary.height + Boundary.height / 2,
+    },
+    velocity: {
+      x: 0,
+      y: 0,
+    },
+  });
+  keys = {
+    w: {
+      pressed: false,
+    },
+    a: {
+      pressed: false,
+    },
+    s: {
+      pressed: false,
+    },
+    d: {
+      pressed: false,
+    },
+  };
+  lastKey = "";
+  game = {
+    over: false,
+    active: true,
+  };
+  score = 0;
+  document.querySelector("#finalScore").innerHTML = score;
+  document.querySelector("#scoreEl").innerHTML = score;
+  animationId;
+  boundaries = generateBoundaries();
+}
+
+let fps = 60;
+let fpsInterval = 1000 / fps;
+let msPrev = window.performance.now();
 function animate() {
+  if (!game.active) return;
   animationId = requestAnimationFrame(animate);
+
+  const msNow = window.performance.now();
+  const elapsed = msNow - msPrev;
+
+  if (elapsed < fpsInterval) return;
+
+  msPrev = msNow - (elapsed % fpsInterval);
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if (keys.w.pressed && lastKey === "w") {
-    for (let i = 0; i < boundaries.length; i++) {
-      const boundary = boundaries[i];
-      if (
-        circleCollidesWithRectangle({
-          circle: {
-            ...player,
-            velocity: {
-              x: 0,
-              y: -5,
-            },
-          },
-          rectangle: boundary,
-        })
-      ) {
-        player.velocity.y = 0;
-        break;
-      } else {
-        player.velocity.y = -5;
-      }
-    }
+    player.moveUp(boundaries);
   } else if (keys.a.pressed && lastKey === "a") {
-    for (let i = 0; i < boundaries.length; i++) {
-      const boundary = boundaries[i];
-      if (
-        circleCollidesWithRectangle({
-          circle: {
-            ...player,
-            velocity: {
-              x: -5,
-              y: 0,
-            },
-          },
-          rectangle: boundary,
-        })
-      ) {
-        player.velocity.x = 0;
-        break;
-      } else {
-        player.velocity.x = -5;
-      }
-    }
+    player.moveLeft(boundaries);
   } else if (keys.s.pressed && lastKey === "s") {
-    for (let i = 0; i < boundaries.length; i++) {
-      const boundary = boundaries[i];
-      if (
-        circleCollidesWithRectangle({
-          circle: {
-            ...player,
-            velocity: {
-              x: 0,
-              y: 5,
-            },
-          },
-          rectangle: boundary,
-        })
-      ) {
-        player.velocity.y = 0;
-        break;
-      } else {
-        player.velocity.y = 5;
-      }
-    }
+    player.moveDown(boundaries);
   } else if (keys.d.pressed && lastKey === "d") {
-    for (let i = 0; i < boundaries.length; i++) {
-      const boundary = boundaries[i];
-      if (
-        circleCollidesWithRectangle({
-          circle: {
-            ...player,
-            velocity: {
-              x: 5,
-              y: 0,
-            },
-          },
-          rectangle: boundary,
-        })
-      ) {
-        player.velocity.x = 0;
-        break;
-      } else {
-        player.velocity.x = 5;
-      }
-    }
+    player.moveRight(boundaries);
   }
 
   for (let i = ghosts.length - 1; i >= 0; i--) {
@@ -522,25 +230,43 @@ function animate() {
       ghost.radius + player.radius
     ) {
       if (ghost.scared) {
+        audio.eatGhost.play();
+        score += 50;
         ghosts.splice(i, 1);
       } else {
         // lose condition
         cancelAnimationFrame(animationId);
-        console.log("you lose");
+        audio.gameOver.play();
+        setTimeout(() => {
+          game.over = true;
+          game.active = false;
+          document.querySelector("#restartScreen").style.display = "flex";
+          document.querySelector("#finalOutcome").style.color = "red";
+          document.querySelector("#finalOutcome").innerHTML = "GAME OVER";
+          document.querySelector("#finalScore").innerHTML = score;
+        }, 2800);
       }
     }
   }
 
   // win condition
   if (pellets.length === 0) {
-    console.log("you win");
+    audio.gameWin.play();
     cancelAnimationFrame(animationId);
+    setTimeout(() => {
+      game.over = true;
+      game.active = false;
+      document.querySelector("#restartScreen").style.display = "flex";
+      document.querySelector("#finalOutcome").style.color = "green";
+      document.querySelector("#finalOutcome").innerHTML = "YOU WIN!";
+      document.querySelector("#finalScore").innerHTML = score;
+    }, 4500);
   }
 
   for (let i = powerUps.length - 1; i >= 0; i--) {
     const powerUp = powerUps[i];
     powerUp.draw();
-    // player eats poweup
+    // player eats powerup
     if (
       Math.hypot(
         powerUp.position.x - player.position.x,
@@ -548,6 +274,7 @@ function animate() {
       ) <
       powerUp.radius + player.radius
     ) {
+      audio.powerDot.play();
       powerUps.splice(i, 1);
 
       // make ghosts scared
@@ -572,6 +299,7 @@ function animate() {
       ) <
       pellet.radius + player.radius
     ) {
+      audio.waka.play();
       pellets.splice(i, 1);
       score += 10;
       scoreEl.innerHTML = score;
@@ -712,41 +440,3 @@ function animate() {
 }
 
 animate();
-
-addEventListener("keydown", ({ key }) => {
-  switch (key) {
-    case "w":
-      keys.w.pressed = true;
-      lastKey = "w";
-      break;
-    case "a":
-      keys.a.pressed = true;
-      lastKey = "a";
-      break;
-    case "s":
-      keys.s.pressed = true;
-      lastKey = "s";
-      break;
-    case "d":
-      keys.d.pressed = true;
-      lastKey = "d";
-      break;
-  }
-});
-
-addEventListener("keyup", ({ key }) => {
-  switch (key) {
-    case "w":
-      keys.w.pressed = false;
-      break;
-    case "a":
-      keys.a.pressed = false;
-      break;
-    case "s":
-      keys.s.pressed = false;
-      break;
-    case "d":
-      keys.d.pressed = false;
-      break;
-  }
-});
