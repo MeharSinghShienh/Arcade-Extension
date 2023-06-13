@@ -2,8 +2,16 @@ const scoreEl = document.querySelector("#scoreEl");
 const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = 1024;
-canvas.height = 576;
+canvas.width = 800;
+canvas.height = 450;
+
+// audio
+enemyShoot = new Audio("./audio/enemyShoot.wav");
+explode = new Audio("./audio/explode.wav");
+gameOver = new Audio("./audio/gameOver.mp3");
+select = new Audio("./audio/select.mp3");
+shoot = new Audio("./audio/shoot.wav");
+start = new Audio("./audio/start.mp3");
 
 let player = new Player();
 let projectiles = [];
@@ -83,7 +91,7 @@ function init() {
 
 function endGame() {
   console.log("you lose");
-  audio.gameOver.play();
+  gameOver.play();
   setTimeout(() => {
     player.opacity = 0;
     game.over = true;
@@ -206,30 +214,10 @@ function animate() {
               score += 100;
               scoreEl.innerHTML = score;
 
-              // dynamic score labels
-              const scoreLabel = document.createElement("label");
-              scoreLabel.innerHTML = 100;
-              scoreLabel.style.position = "absolute";
-              scoreLabel.style.color = "white";
-              scoreLabel.style.top = invader.position.y + "px";
-              scoreLabel.style.left = invader.position.x + "px";
-              scoreLabel.style.userSelect = "none";
-
-              document.querySelector("#parentDiv").appendChild(scoreLabel);
-
-              gsap.to(scoreLabel, {
-                opacity: 0,
-                y: -30,
-                duration: 0.75,
-                onComplete: () => {
-                  document.querySelector("#parentDiv").removeChild(scoreLabel);
-                },
-              });
-
               createParticles({
                 object: invader,
               });
-              audio.explode.play();
+              explode.play();
               grid.invaders.splice(i, 1);
               projectiles.splice(j, 1);
               if (grid.invaders.length > 0) {
@@ -290,8 +278,7 @@ function animate() {
 // animate();
 
 document.querySelector("#startButton").addEventListener("click", () => {
-  audio.start.play();
-  audio.backgroundMusic.play();
+  start.play();
   document.querySelector("#startScreen").style.display = "none";
   document.querySelector("#scoreContainer").style.display = "block";
   init();
@@ -299,7 +286,7 @@ document.querySelector("#startButton").addEventListener("click", () => {
 });
 
 document.querySelector("#restartButton").addEventListener("click", () => {
-  audio.select.play();
+  select.play();
   document.querySelector("#restartScreen").style.display = "none";
   init();
   animate();
@@ -324,8 +311,8 @@ addEventListener("keydown", ({ key }) => {
       keys.d.pressed = true;
       break;
     case " ":
-      if (projectiles.length <= 3) {
-        audio.shoot.play();
+      if (projectiles.length <= 10) {
+        shoot.play();
         keys.space.pressed = true;
         projectiles.push(
           new Projectile({
@@ -363,4 +350,27 @@ addEventListener("keyup", ({ key }) => {
       keys.space.pressed = false;
       break;
   }
+});
+
+let audioClicks = 0;
+
+document.querySelector("#audioIcon").addEventListener("click", () => {
+  if (audioClicks % 2 == 0) {
+    document.querySelector("#audioIcon").src = "./img/volumeoff.png";
+    enemyShoot.muted = true;
+    explode.muted = true;
+    gameOver.muted = true;
+    select.muted = true;
+    shoot.muted = true;
+    start.muted = true;
+  } else {
+    document.querySelector("#audioIcon").src = "./img/volumeon.png";
+    enemyShoot.muted = false;
+    explode.muted = false;
+    gameOver.muted = false;
+    select.muted = false;
+    shoot.muted = false;
+    start.muted = false;
+  }
+  audioClicks++;
 });

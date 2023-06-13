@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Space Invaders",
+  "version": "1.0.0",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Space Invaders"
+  }
+}

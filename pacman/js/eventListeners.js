@@ -74,3 +74,24 @@ addEventListener("keyup", ({ key }) => {
       break;
   }
 });
+
+let audioClicks = 0;
+
+document.querySelector("#audioIcon").addEventListener("click", () => {
+  if (audioClicks % 2 == 0) {
+    document.querySelector("#audioIcon").src = "./img/volumeoff.png";
+    eatGhost.muted = true;
+    gameOver.muted = true;
+    gameWin.muted = true;
+    powerDot.muted = true;
+    waka.muted = true;
+  } else {
+    document.querySelector("#audioIcon").src = "./img/volumeon.png";
+    eatGhost.muted = false;
+    gameOver.muted = false;
+    gameWin.muted = false;
+    powerDot.muted = false;
+    waka.muted = false;
+  }
+  audioClicks++;
+});

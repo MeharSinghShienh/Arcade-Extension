@@ -1,7 +1,7 @@
 // board
 let board;
 let boardWidth = 360;
-let boardHeight = 640;
+let boardHeight = 590;
 let context;
 
 // bird
@@ -33,8 +33,19 @@ let velocityX = -2; // speed of pipes moving left
 let velocityY = 0; // bird jump speed
 let gravity = 0.4;
 
+// audio
+die = new Audio("./audio/sfx_die.wav");
+hit = new Audio("./audio/sfx_hit.wav");
+point = new Audio("./audio/sfx_point.wav");
+wing = new Audio("./audio/sfx_wing.wav");
+
+let gameStart = false;
 let gameOver = false;
+let birdOutOfFrame = false;
+
 let score = 0;
+
+let hitAudio = 0;
 
 window.onload = function () {
   board = document.getElementById("board");
@@ -66,10 +77,31 @@ window.onload = function () {
 
 function update() {
   requestAnimationFrame(update);
-  if (gameOver) {
+  if (birdOutOfFrame) {
     return;
   }
+  if (gameOver) {
+    if (velocityY < 0) {
+      velocityY = 0;
+    }
+    velocityY += gravity;
+    bird.y += velocityY;
+
+    context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+    if (bird.y > board.height) {
+      birdOutOfFrame = true;
+      return;
+    }
+  }
   context.clearRect(0, 0, board.width, board.height);
+
+  if (!gameStart) {
+    context.fillStyle = "white";
+    context.font = "30px sans-serif";
+    context.fillText("Press Space to Start", board.width / 8, board.height / 3);
+    context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+    return;
+  }
 
   // bird
   velocityY += gravity;
@@ -77,6 +109,11 @@ function update() {
   context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
   if (bird.y > board.height) {
+    if (hitAudio == 0) {
+      die.play();
+      hitAudio++;
+    }
+    birdOutOfFrame = true;
     gameOver = true;
   }
 
@@ -88,10 +125,15 @@ function update() {
 
     if (!pipe.passed && bird.x > pipe.x + pipe.width) {
       score += 0.5;
+      point.play();
       pipe.passed = true;
     }
 
     if (detectCollision(bird, pipe)) {
+      if (hitAudio == 0) {
+        hit.play();
+        hitAudio++;
+      }
       gameOver = true;
     }
   }
@@ -108,11 +150,17 @@ function update() {
 
   if (gameOver) {
     context.fillText("GAME OVER", 5, 90);
+    context.font = "25px sans-serif";
+    context.fillText(
+      "Press Space to Play Again",
+      board.width / 10,
+      board.height / 2
+    );
   }
 }
 
 function placePipes() {
-  if (gameOver) {
+  if (gameOver || !gameStart) {
     return;
   }
   let randomPipeY = pipeY - pipeHeight / 4 - Math.random() * (pipeHeight / 2);
@@ -143,12 +191,21 @@ function moveBird(event) {
   if (event.code == "Space" || event.code == "ArrowUp") {
     // jump
     velocityY = -6;
+    if (!gameOver) {
+      //wing.play();
+    }
+
+    if (!gameStart) {
+      gameStart = true;
+    }
 
     // reset game
-    if (gameOver) {
+    if (gameOver && birdOutOfFrame) {
+      birdOutOfFrame = false;
       bird.y = birdY;
       pipeArray = [];
       score = 0;
+      hitAudio = 0;
       gameOver = false;
     }
   }
@@ -162,3 +219,22 @@ function detectCollision(rect1, rect2) {
     rect1.y + rect1.height > rect2.y
   );
 }
+
+let audioClicks = 0;
+
+document.getElementById("audioIcon").addEventListener("click", () => {
+  if (audioClicks % 2 == 0) {
+    document.querySelector("#audioIcon").src = "./img/volumeoff.png";
+    die.muted = true;
+    hit.muted = true;
+    point.muted = true;
+    wing.muted = true;
+  } else {
+    document.querySelector("#audioIcon").src = "./img/volumeon.png";
+    die.muted = false;
+    hit.muted = false;
+    point.muted = false;
+    wing.muted = false;
+  }
+  audioClicks++;
+});

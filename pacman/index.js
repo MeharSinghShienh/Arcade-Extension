@@ -22,6 +22,13 @@ const map = [
 canvas.width = map[0].length * Boundary.width;
 canvas.height = map.length * Boundary.height;
 
+// audio
+eatGhost = new Audio("./audio/eat_ghost.wav");
+gameOver = new Audio("./audio/gameOver.wav");
+gameWin = new Audio("./audio/gameWin.wav");
+powerDot = new Audio("./audio/power_dot.wav");
+waka = new Audio("./audio/waka.wav");
+
 let pellets = [];
 let powerUps = [];
 let ghosts = [
@@ -230,13 +237,13 @@ function animate() {
       ghost.radius + player.radius
     ) {
       if (ghost.scared) {
-        audio.eatGhost.play();
+        eatGhost.play();
         score += 50;
         ghosts.splice(i, 1);
       } else {
         // lose condition
         cancelAnimationFrame(animationId);
-        audio.gameOver.play();
+        gameOver.play();
         setTimeout(() => {
           game.over = true;
           game.active = false;
@@ -251,7 +258,7 @@ function animate() {
 
   // win condition
   if (pellets.length === 0) {
-    audio.gameWin.play();
+    gameWin.play();
     cancelAnimationFrame(animationId);
     setTimeout(() => {
       game.over = true;
@@ -274,7 +281,7 @@ function animate() {
       ) <
       powerUp.radius + player.radius
     ) {
-      audio.powerDot.play();
+      powerDot.play();
       powerUps.splice(i, 1);
 
       // make ghosts scared
@@ -299,7 +306,7 @@ function animate() {
       ) <
       pellet.radius + player.radius
     ) {
-      audio.waka.play();
+      waka.play();
       pellets.splice(i, 1);
       score += 10;
       scoreEl.innerHTML = score;
